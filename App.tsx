@@ -120,7 +120,7 @@ const App: React.FC = () => {
         <div className={`grid grid-cols-1 ${gridCols} gap-4 mb-6`}>
           {mode === 'extract' ? (
             <>
-              <div className="h-[260px]">
+              <div className="h-[160px]">
                 <ImageUploadCard
                   id="original-image"
                   title="1. Ảnh Gốc"
@@ -133,7 +133,7 @@ const App: React.FC = () => {
                 />
               </div>
 
-              <div className="h-[260px]">
+              <div className="h-[160px]">
                 <ResultCard
                   title="2. Trang phục đã tách"
                   imageUrl={clothingImage}
@@ -142,7 +142,7 @@ const App: React.FC = () => {
                 />
               </div>
 
-              <div className="h-[260px]">
+              <div className="h-[160px]">
                 <ImageUploadCard
                   id="model-image"
                   title="3. Người mẫu Mới"
@@ -153,7 +153,7 @@ const App: React.FC = () => {
             </>
           ) : (
             <>
-              <div className="h-[260px]">
+              <div className="h-[160px]">
                 <ImageUploadCard
                   id="product-image"
                   title="1. Ảnh Trang phục"
@@ -161,7 +161,7 @@ const App: React.FC = () => {
                   onImageUpload={setProductImage}
                 />
               </div>
-              <div className="h-[260px]">
+              <div className="h-[160px]">
                 <ImageUploadCard
                   id="model-image"
                   title="2. Người mẫu Mới"

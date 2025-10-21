@@ -1,0 +1,5 @@
+{
+  "name": "Copy of Phòng Thay Đồ",
+  "description": "An application that allows users to virtually try on clothing from one image onto a person in another image using AI.",
+  "requestFramePermissions": []
+}

@@ -5,35 +5,142 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Phòng Thử Đồ AI - NgocPro</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
         theme: {
           extend: {
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-            },
+            fontFamily: { sans: ['Inter', 'sans-serif'] },
           },
         },
       }
     </script>
-  <script type="importmap">
-{
-  "imports": {
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.25.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
-</head>
+
+    <!-- Import map của bạn (giữ nguyên) -->
+    <script type="importmap">
+    {
+      "imports": {
+        "@google/genai": "https://aistudiocdn.com/@google/genai@^1.25.0",
+        "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+        "react/": "https://aistudiocdn.com/react@^19.2.0/",
+        "react": "https://aistudiocdn.com/react@^19.2.0"
+      }
+    }
+    </script>
+
+    <link rel="stylesheet" href="/index.css">
+  </head>
   <body class="bg-slate-900">
     <div id="root"></div>
+
+    <!-- 👇 Thêm MỚI: Module lưu/đọc key + UI nhập key -->
+    <script type="module">
+      // ======= key-store (global) =======
+      const STORAGE_KEY = "gemini_api_key";
+
+      function getGeminiApiKey() {
+        try {
+          const url = new URL(window.location.href);
+          const k = url.searchParams.get("key");
+          if (k) {
+            localStorage.setItem(STORAGE_KEY, k);
+            url.searchParams.delete("key");
+            window.history.replaceState({}, "", url.toString());
+            return k;
+          }
+          return localStorage.getItem(STORAGE_KEY);
+        } catch {
+          return null;
+        }
+      }
+
+      function setGeminiApiKey(k) {
+        localStorage.setItem(STORAGE_KEY, k);
+      }
+
+      function clearGeminiApiKey() {
+        localStorage.removeItem(STORAGE_KEY);
+      }
+
+      // expose ra window để code khác dùng
+      window.getGeminiApiKey = getGeminiApiKey;
+      window.setGeminiApiKey = setGeminiApiKey;
+      window.clearGeminiApiKey = clearGeminiApiKey;
+
+      // ======= UI nhập key (simple modal) =======
+      function ensureGeminiKeyUI(onReady) {
+        const has = getGeminiApiKey();
+        if (has) {
+          onReady && onReady();
+          return;
+        }
+        showKeyDialog(onReady);
+      }
+
+      function showKeyDialog(onReady) {
+        const backdrop = document.createElement("div");
+        backdrop.style.cssText = `
+          position:fixed;inset:0;background:rgba(0,0,0,.45);
+          display:flex;align-items:center;justify-content:center;z-index:9999;
+        `;
+
+        const card = document.createElement("div");
+        card.style.cssText = `
+          width:420px;max-width:92vw;background:#111;color:#fff;border:1px solid #333;
+          border-radius:14px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.4);
+          font-family:system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+        `;
+        card.innerHTML = `
+          <h3 style="margin:0">Enter Gemini API Key</h3>
+          <p style="margin-top:8px;opacity:.8">
+            Get one at <a href="https://aistudio.google.com/" target="_blank" rel="noreferrer">Google AI Studio</a>.
+          </p>
+          <input id="__k" placeholder="AIza... / AIza..." style="
+            width:100%;padding:10px 12px;border-radius:10px;border:1px solid #333;
+            background:#0b0b0b;color:#fff;outline:none;margin-top:8px;
+          " />
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button id="__save" style="
+              padding:8px 12px;background:#3b82f6;color:#fff;border:1px solid #2563eb;
+              border-radius:10px;cursor:pointer;
+            ">Save</button>
+            <button id="__clear" style="
+              padding:8px 12px;background:#1f1f1f;color:#fff;border:1px solid #333;
+              border-radius:10px;cursor:pointer;
+            ">Clear</button>
+          </div>
+          <p style="margin-top:8px;font-size:12px;opacity:.7">
+            Key is stored in your browser (localStorage).
+          </p>
+        `;
+
+        backdrop.appendChild(card);
+        document.body.appendChild(backdrop);
+
+        card.querySelector("#__save").onclick = () => {
+          const key = card.querySelector("#__k").value.trim();
+          if (!key) return;
+          setGeminiApiKey(key);
+          document.body.removeChild(backdrop);
+          onReady && onReady();
+        };
+        card.querySelector("#__clear").onclick = () => {
+          clearGeminiApiKey();
+          card.querySelector("#__k").value = "";
+        };
+      }
+
+      // gọi sớm để hiện UI nếu chưa có key
+      ensureGeminiKeyUI();
+    </script>
+    <!-- 👆 Hết phần thêm mới -->
+
+    <!-- Giữ nguyên: load app React/Vite của bạn -->
     <script type="module" src="/index.tsx"></script>
   </body>
 </html>

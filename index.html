@@ -21,7 +21,7 @@
       }
     </script>
 
-    <!-- Import map của bạn (giữ nguyên) -->
+    <!-- Import map (giữ nguyên) -->
     <script type="importmap">
     {
       "imports": {
@@ -32,15 +32,15 @@
       }
     }
     </script>
-
-    <link rel="stylesheet" href="/index.css">
+    <!-- ❌ BỎ vì gây 404 khi deploy (file này không còn sau build) -->
+    <!-- <link rel="stylesheet" href="/index.css"> -->
   </head>
+
   <body class="bg-slate-900">
     <div id="root"></div>
 
-    <!-- 👇 Thêm MỚI: Module lưu/đọc key + UI nhập key -->
+    <!-- ========= UI nhập/lưu API key ========= -->
     <script type="module">
-      // ======= key-store (global) =======
       const STORAGE_KEY = "gemini_api_key";
 
       function getGeminiApiKey() {
@@ -54,33 +54,15 @@
             return k;
           }
           return localStorage.getItem(STORAGE_KEY);
-        } catch {
-          return null;
-        }
+        } catch { return null; }
       }
+      function setGeminiApiKey(k) { localStorage.setItem(STORAGE_KEY, k); }
+      function clearGeminiApiKey() { localStorage.removeItem(STORAGE_KEY); }
 
-      function setGeminiApiKey(k) {
-        localStorage.setItem(STORAGE_KEY, k);
-      }
-
-      function clearGeminiApiKey() {
-        localStorage.removeItem(STORAGE_KEY);
-      }
-
-      // expose ra window để code khác dùng
+      // Expose để code TS/TSX khác dùng
       window.getGeminiApiKey = getGeminiApiKey;
       window.setGeminiApiKey = setGeminiApiKey;
       window.clearGeminiApiKey = clearGeminiApiKey;
-
-      // ======= UI nhập key (simple modal) =======
-      function ensureGeminiKeyUI(onReady) {
-        const has = getGeminiApiKey();
-        if (has) {
-          onReady && onReady();
-          return;
-        }
-        showKeyDialog(onReady);
-      }
 
       function showKeyDialog(onReady) {
         const backdrop = document.createElement("div");
@@ -88,7 +70,6 @@
           position:fixed;inset:0;background:rgba(0,0,0,.45);
           display:flex;align-items:center;justify-content:center;z-index:9999;
         `;
-
         const card = document.createElement("div");
         card.style.cssText = `
           width:420px;max-width:92vw;background:#111;color:#fff;border:1px solid #333;
@@ -118,7 +99,6 @@
             Key is stored in your browser (localStorage).
           </p>
         `;
-
         backdrop.appendChild(card);
         document.body.appendChild(backdrop);
 
@@ -135,12 +115,31 @@
         };
       }
 
-      // gọi sớm để hiện UI nếu chưa có key
-      ensureGeminiKeyUI();
-    </script>
-    <!-- 👆 Hết phần thêm mới -->
+      function ensureGeminiKeyUI(onReady) {
+        const has = getGeminiApiKey();
+        if (has) { onReady && onReady(); return; }
+        showKeyDialog(onReady);
+      }
 
-    <!-- Giữ nguyên: load app React/Vite của bạn -->
-    <script type="module" src="/index.tsx"></script>
+      // Nút nổi để nhập lại key bất cứ lúc nào
+      function renderFloatingKeyButton() {
+        const btn = document.createElement("button");
+        btn.textContent = "API Key";
+        btn.style.cssText = `
+          position:fixed;right:16px;bottom:16px;z-index:9999;
+          padding:8px 12px;border-radius:10px;border:1px solid #333;
+          background:#1f2937;color:#fff;cursor:pointer;
+        `;
+        btn.onclick = () => showKeyDialog();
+        document.body.appendChild(btn);
+      }
+
+      ensureGeminiKeyUI();
+      renderFloatingKeyButton();
+    </script>
+    <!-- ========= /UI nhập/lưu API key ========= -->
+
+    <!-- Entry script cho Vite (DEV: /src/main.tsx; PROD: Vite sẽ rewrite thành /assets/*.js) -->
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
